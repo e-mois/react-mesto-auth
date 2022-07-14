@@ -18,6 +18,26 @@ class RegisterApi {
     })
     .then(this._checkResponseStatus)
   }
+
+  authorize(data) {
+    return fetch(`${this._options.baseUrl}/signin`, {
+      method: 'POST',
+      headers: this._options.headers,
+      body: JSON.stringify(data)
+    })
+    .then(this._checkResponseStatus)
+  }
+
+  getContent(token) {
+    return fetch(`${this._options.baseUrl}/users/me`, {
+      headers: {
+        "Authorization" : `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(this._checkResponseStatus)
+  }
+
 }
 
 const registerApi = new RegisterApi({

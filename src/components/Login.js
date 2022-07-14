@@ -1,18 +1,30 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import AuthForm from './AuthForm';
 
-function Login() {
+function Login(props) {
 
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
 
-  function handleChangeEmail() {
-
+  function handleChangeEmail(event) {
+    setEmail(event.target.value)
   }
 
-  function handleChangePass() {
+  function handleChangePass(event) {
+    setPass(event.target.value)
+  }
 
+  function handleSubmit(event) {
+    event.preventDefault();
+    props.onLoginUser({
+      email,
+      password: pass,
+    })
+    props.onSuccess();
+    setEmail('');
+    setPass('');
+    props.history.push('/');
   }
 
   return (
@@ -22,6 +34,7 @@ function Login() {
       buttonName='Войти'
       headerLinkName='Регистрация'
       headerLinkUrl='/sign-up'
+      onSubmit={handleSubmit}
     >
       <label htmlFor="input-email" className="popup__label">
         <input 
@@ -55,4 +68,4 @@ function Login() {
   )
 }
 
-export default Login;
+export default withRouter(Login);

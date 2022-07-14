@@ -8,13 +8,13 @@ import registerApi from "../utils/RegisterApi";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, withRouter } from 'react-router-dom';
 import Login from "./Login";
 import Register from "./Register";
 import ProtectedRoute from "./ProtectedRoute";
 
 
-function App() {
+function App(props) {
   
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
@@ -24,7 +24,9 @@ function App() {
   const [cards, setCards] = useState([]);
 
   const [loggedIn, setLoggedIn] = useState(false);
-  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
+  const [isPopupWithoutFormOpen, setIsPopupWithoutFormOpen] = useState(false);
+  const [pageData, setPageData] = useState({});
+  const [auth, setAuth] = useState(false);
 
   useEffect(() => {
     api.getCards()
@@ -69,8 +71,12 @@ function App() {
     setIsAddPlacePopupOpen(true);
   }
 
-  function handleSuccessPopupOpen() {
-    setIsSuccessPopupOpen(true);
+  function handlePopupWithoutFormOpen() {
+    setIsPopupWithoutFormOpen(true);
+  }
+
+  function handleAuth() {
+    setLoggedIn(true);
   }
 
   function closeAllPopups() {
@@ -78,7 +84,7 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setSelectedCard({});
-    setIsSuccessPopupOpen(false);
+    setIsPopupWithoutFormOpen(false);
   }
 
   useEffect(() => {
@@ -127,11 +133,54 @@ function App() {
   function handleRegisterUser(data) {
     registerApi.register(data)
     .then((res) => {
+      setAuth(true);
       return res;
+    })
+    .catch((err) => {
+      setAuth(false);
+      console.log(err);
+    })
+  }
+
+  function handleLoginUser(data) {
+    registerApi.authorize(data)
+    .then((res) => {
+      if (res.token) {
+        localStorage.setItem('token', res.token);
+        console.log(localStorage);
+      } else {
+        return;
+      }
     })
     .catch((err) => {
       console.log(err);
     })
+  }
+
+  function checkToken() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      registerApi.getContent(token)
+      .then((data) => {
+        if (data) {
+          const userData = {
+            'email': data.data.email,
+          }
+          setPageData(userData);
+          setLoggedIn(true)
+          props.history.push('/')
+          
+        }
+      })
+    }
+  }
+
+  useEffect(() => {
+    checkToken();
+  }, [])
+
+  function logout() {
+    setLoggedIn(false)
   }
 
   return (
@@ -149,12 +198,16 @@ function App() {
             cards={cards}
             onCardLike={handleCardLike}
             onCardDelete={handleCardDelete}
+            headerLinkName='Выйти'
+            headerLinkUrl='/sign-in'
+            onClick={logout}
+            pageData={pageData.email}
           />
           <Route path="/sign-in">
-            <Login />
+            <Login onLoginUser={handleLoginUser} onSuccess={handleAuth} />
           </Route>
           <Route path="/sign-up">
-            <Register isOpen={isSuccessPopupOpen} onClose={closeAllPopups} onRegisterUser={handleRegisterUser} onSuccess={handleSuccessPopupOpen} />
+            <Register isOpen={isPopupWithoutFormOpen} onClose={closeAllPopups} onRegisterUser={handleRegisterUser} onSuccess={handlePopupWithoutFormOpen} auth={auth} />
           </Route>
         </Switch>
 
@@ -177,4 +230,4 @@ function App() {
   );
 }
 
-export default App;
+export default withRouter(App);

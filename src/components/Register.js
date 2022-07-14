@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import AuthForm from './AuthForm';
-import RegistrationSuccess from './RegistrationSuccess';
+import RegistrationAnswer from './RegistrationAnswer';
 
 function Register(props) {
 
@@ -22,59 +22,67 @@ function Register(props) {
       email,
       password: pass,
     });
-    props.onSuccess();
+    if (props.auth) {
+      props.onSuccess();
+    }
   }
 
-  function closeSuccessPopup() {
+  function closePopupWithoutForm() {
     props.onClose();
-    props.history.push('/sign-in');
+    if (props.auth) {
+      props.history.push('/sign-in');
+    } else {
+      setEmail('');
+      setPass('');
+    }
   }
 
   return (
     <>
-    <AuthForm
-      name='login'
-      title='Регистрация'
-      buttonName='Зарегистрировать'
-      headerLinkName='Войти'
-      headerLinkUrl='/sign-in'
-      onSubmit={handleSubmit}
-    >
-      <label htmlFor="input-email" className="popup__label">
-        <input 
-          type="text" 
-          id="input-email" 
-          className="auth__input" 
-          placeholder="Email" 
-          required 
-          minLength="2" 
-          maxLength="30" 
-          name="email" 
-          onChange={handleChangeEmail}
-          value={email}
-        />
-        <span className="input-email-error popup__input-error"></span>
-      </label>
-      <label htmlFor="input-pass" className="popup__label">
-        <input 
-          type="password" 
-          id="input-pass" 
-          className="auth__input" 
-          placeholder="Пароль" 
-          required 
-          name="pass" 
-          onChange={handleChangePass}
-          value={pass}
-        />
-        <span className="input-pass-error popup__input-error"></span>
-      </label>
-    </AuthForm>
+      <AuthForm
+        name='login'
+        title='Регистрация'
+        buttonName='Зарегистрировать'
+        headerLinkName='Войти'
+        headerLinkUrl='/sign-in'
+        onSubmit={handleSubmit}
+      >
+        <label htmlFor="input-email" className="popup__label">
+          <input 
+            type="text" 
+            id="input-email" 
+            className="auth__input" 
+            placeholder="Email" 
+            required 
+            minLength="2" 
+            maxLength="30" 
+            name="email" 
+            onChange={handleChangeEmail}
+            value={email}
+          />
+          <span className="input-email-error popup__input-error"></span>
+        </label>
+        <label htmlFor="input-pass" className="popup__label">
+          <input 
+            type="password" 
+            id="input-pass" 
+            className="auth__input" 
+            placeholder="Пароль" 
+            required 
+            name="pass" 
+            onChange={handleChangePass}
+            value={pass}
+          />
+          <span className="input-pass-error popup__input-error"></span>
+        </label>
+      </AuthForm>
     
-    <p className='auth__note'>Уже зарегистрированы? <Link to='/sign-in'>Войти</Link></p>
-    <RegistrationSuccess
-      isOpen={props.isOpen}
-      onClose={closeSuccessPopup}
-    />
+      <p className='auth__note'>Уже зарегистрированы? <Link to='/sign-in' className='auth__link'>Войти</Link></p>
+      <RegistrationAnswer
+        isOpen={props.isOpen}
+        onClose={closePopupWithoutForm}
+        answer={props.auth}
+      />
     </>
   )
 }

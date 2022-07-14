@@ -13,3 +13,7 @@
   font-weight: 400;
   font-size: 18px;
 }
+
+.auth__button:hover {
+  background-color: #a9a9a9;
+}

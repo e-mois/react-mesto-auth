@@ -1,12 +1,21 @@
 import { useContext } from "react";
 import Card from "./Card";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import Header from "./Header";
+import Footer from "./Footer";
 
 function Main(props) {
 
   const currentUser = useContext(CurrentUserContext);
 
   return (
+    <>
+    <Header
+      buttonName={props.headerLinkName} 
+      headerLink={props.headerLinkUrl}
+    >
+      {props.pageData}
+    </Header>
     <main className="content">
       <section className="profile">
         <div className="profile__info">
@@ -38,6 +47,8 @@ function Main(props) {
         </ul>
       </section>
     </main>
+    <Footer />
+    </>
   )
 }
 
