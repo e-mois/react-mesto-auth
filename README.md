@@ -13,4 +13,8 @@
 * Доработка мобильной версии
 * Рефакторинг кода
 
-* [Ссылка на проект на GH-Pages](https://e-mois.github.io/react-mesto-auth/)
+[Ссылка на проект на GH-Pages](https://e-mois.github.io/react-mesto-auth/)
+
+Для запуска склонируйте проект к себе и выполните команду ```npm start``` в консоли
+
+
