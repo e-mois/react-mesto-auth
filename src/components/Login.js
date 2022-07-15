@@ -21,10 +21,8 @@ function Login(props) {
       email,
       password: pass,
     })
-    props.onSuccess();
     setEmail('');
     setPass('');
-    props.history.push('/');
   }
 
   return (

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import AuthForm from './AuthForm';
-import RegistrationAnswer from './RegistrationAnswer';
 
 function Register(props) {
 
@@ -24,16 +23,6 @@ function Register(props) {
     });
     if (props.auth) {
       props.onSuccess();
-    }
-  }
-
-  function closePopupWithoutForm() {
-    props.onClose();
-    if (props.auth) {
-      props.history.push('/sign-in');
-    } else {
-      setEmail('');
-      setPass('');
     }
   }
 
@@ -78,11 +67,6 @@ function Register(props) {
       </AuthForm>
     
       <p className='auth__note'>Уже зарегистрированы? <Link to='/sign-in' className='auth__link'>Войти</Link></p>
-      <RegistrationAnswer
-        isOpen={props.isOpen}
-        onClose={closePopupWithoutForm}
-        answer={props.auth}
-      />
     </>
   )
 }

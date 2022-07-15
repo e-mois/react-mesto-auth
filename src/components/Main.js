@@ -13,6 +13,7 @@ function Main(props) {
     <Header
       buttonName={props.headerLinkName} 
       headerLink={props.headerLinkUrl}
+      onClick={props.onClick}
     >
       {props.pageData}
     </Header>

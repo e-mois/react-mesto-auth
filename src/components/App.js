@@ -8,6 +8,7 @@ import registerApi from "../utils/RegisterApi";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
+import RegistrationAnswer from './RegistrationAnswer';
 import { Route, Switch, withRouter } from 'react-router-dom';
 import Login from "./Login";
 import Register from "./Register";
@@ -26,17 +27,20 @@ function App(props) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [isPopupWithoutFormOpen, setIsPopupWithoutFormOpen] = useState(false);
   const [pageData, setPageData] = useState({});
-  const [auth, setAuth] = useState(false);
+  const [popupSuccess, setPopupSuccess] = useState(false);
 
   useEffect(() => {
-    api.getCards()
-    .then(res => {
-      setCards(res)
-    })
-    .catch((err) => {
-      console.log(err)
-    });
-  }, [])
+    if (loggedIn) {
+      api.getCards()
+      .then(res => {
+        setCards(res)
+      })
+      .catch((err) => {
+        console.log(err)
+      });
+    }
+    
+  }, [loggedIn])
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
@@ -71,12 +75,9 @@ function App(props) {
     setIsAddPlacePopupOpen(true);
   }
 
-  function handlePopupWithoutFormOpen() {
+  function handlePopupWithoutFormOpen(result) {
+    setPopupSuccess(result);
     setIsPopupWithoutFormOpen(true);
-  }
-
-  function handleAuth() {
-    setLoggedIn(true);
   }
 
   function closeAllPopups() {
@@ -84,18 +85,19 @@ function App(props) {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setSelectedCard({});
-    setIsPopupWithoutFormOpen(false);
   }
 
   useEffect(() => {
-    api.getUser()
-    .then(res => {
-      setCurrentUser(res);
-    })
-    .catch((err) => {
-      console.log(err)
-    });
-  }, [])
+    if (loggedIn) {
+      api.getUser()
+      .then(res => {
+        setCurrentUser(res);
+      })
+      .catch((err) => {
+        console.log(err)
+      });
+    }
+  }, [loggedIn])
 
   function handleUpdateUser(data) {
     api.editProfile(data)
@@ -133,11 +135,11 @@ function App(props) {
   function handleRegisterUser(data) {
     registerApi.register(data)
     .then((res) => {
-      setAuth(true);
+      handlePopupWithoutFormOpen(true);
       return res;
     })
     .catch((err) => {
-      setAuth(false);
+      handlePopupWithoutFormOpen(false);
       console.log(err);
     })
   }
@@ -147,12 +149,18 @@ function App(props) {
     .then((res) => {
       if (res.token) {
         localStorage.setItem('token', res.token);
-        console.log(localStorage);
+        setLoggedIn(true);
+        setPageData({
+          'email': data.email,
+        });
+        setLoggedIn(true)
+        props.history.push('/');
       } else {
         return;
       }
     })
     .catch((err) => {
+      handlePopupWithoutFormOpen(false);
       console.log(err);
     })
   }
@@ -172,6 +180,9 @@ function App(props) {
           
         }
       })
+      .catch((err) => {
+        console.log(err);
+      })
     }
   }
 
@@ -180,7 +191,13 @@ function App(props) {
   }, [])
 
   function logout() {
-    setLoggedIn(false)
+    localStorage.setItem('token', '');
+    setLoggedIn(false);
+  }
+
+  function closePopupWithoutForm() {
+    setIsPopupWithoutFormOpen(false);
+    props.history.push('/');
   }
 
   return (
@@ -204,16 +221,19 @@ function App(props) {
             pageData={pageData.email}
           />
           <Route path="/sign-in">
-            <Login onLoginUser={handleLoginUser} onSuccess={handleAuth} />
+            <Login onLoginUser={handleLoginUser} />
           </Route>
           <Route path="/sign-up">
-            <Register isOpen={isPopupWithoutFormOpen} onClose={closeAllPopups} onRegisterUser={handleRegisterUser} onSuccess={handlePopupWithoutFormOpen} auth={auth} />
+            <Register onRegisterUser={handleRegisterUser} />
           </Route>
         </Switch>
 
         <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser}/>
         <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar}/>
         <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onSavePlace={handleAddPlaceSubmit}/>
+
+        <RegistrationAnswer isOpen={isPopupWithoutFormOpen} onClose={closePopupWithoutForm} answer={popupSuccess} />
+
         <PopupWithForm
           name='delete'
           title='Вы уверены?'
